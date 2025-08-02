@@ -2,36 +2,42 @@
 import React from 'react';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import theme from './styles/theme';
-import Desktop from './components/Desktop'
+import Desktop from './components/Desktop';
+import Dock from './components/Dock';
 
-// Componente de Estilo Global para aplicar o fundo de grade e outros estilos base.
-// Ele utiliza o tema que passamos para o ThemeProvider.
+// O GlobalStyle foi atualizado para usar uma imagem de fundo.
 const GlobalStyle = createGlobalStyle`
   body {
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
     
     /* 
-      Cria o efeito de grade usando gradientes lineares.
-      Duas camadas de gradientes são sobrepostas: uma para as linhas horizontais
-      e outra para as verticais.
+      1. As propriedades de 'background-image' e 'background-size'
+         que criavam a grade foram removidas.
     */
-    background-image: 
-      linear-gradient(to right, ${({ theme }) => theme.colors.gridLine} 1px, transparent 1px),
-      linear-gradient(to bottom, ${({ theme }) => theme.colors.gridLine} 1px, transparent 1px);
-    background-size: 20px 20px; // Define o tamanho de cada célula da grade
-    overflow: hidden; // Impede o scroll da página, a "área de trabalho" é fixa.
+
+    /* 
+      2. Adicionando o novo wallpaper.
+      - A imagem 'waves.jpg' é carregada a partir da pasta /public.
+      - 'background-size: cover' garante que a imagem cubra toda a tela.
+      - 'background-position: center' centraliza a imagem.
+      - 'background-repeat: no-repeat' impede que a imagem se repita.
+    */
+    background-image: url('/waves.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
   }
 `;
 
 function App() {
   return (
-    // O ThemeProvider disponibiliza o objeto 'theme' para todos os componentes
-    // estilizados aninhados, via props.
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      {/* Aqui é onde nosso desktop e todos os outros componentes viverão.*/}
       <Desktop />
+      <Dock />
     </ThemeProvider>
   );
 }

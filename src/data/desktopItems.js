@@ -2,52 +2,42 @@
 
 /*
   Este arquivo funciona como um "banco de dados" estático para os itens
-  que serão exibidos na área de trabalho. Manter os dados separados da
-  lógica de renderização (componentes) torna o código mais limpo e fácil de manter.
+  que serão exibidos na área de trabalho.
+
+  A propriedade 'type' foi substituída por 'icon', que contém o nome
+  do arquivo de imagem correspondente na pasta /public.
 */
 
 const desktopItems = [
   {
     id: 'resume',
     name: 'Resume.pdf',
-    type: 'file-pdf',
-    initialPosition: { top: '35%', left: '5%' },
+    icon: 'file.avif', // Alterado de 'type' para 'icon'
   },
   {
     id: 'about',
     name: 'About Me',
-    type: 'folder',
-    initialPosition: { top: '60%', left: '20%' },
+    icon: 'folder.avif', // Alterado de 'type' para 'icon'
   },
   {
     id: 'project01',
-    name: 'Project 01 (AbsolutMess)',
-    type: 'folder',
-    initialPosition: { top: '40%', right: '10%' },
+    name: 'Project 01 (BWR Tracker)',
+    icon: 'folder.avif', // Alterado de 'type' para 'icon'
   },
   {
     id: 'project02',
-    name: 'Project 02 (Simplingo)',
-    type: 'folder',
-    initialPosition: { top: '25%', right: '12%' },
+    name: 'Project 02 (Unified Plataform)',
+    icon: 'folder.avif', // Alterado de 'type' para 'icon'
   },
   {
     id: 'project03',
-    name: 'Project 03 (Leafpress)',
-    type: 'folder',
-    initialPosition: { top: '60%', right: '25%' },
-  },
-  {
-    id: 'project04',
-    name: 'Project 04 (Amazon)',
-    type: 'folder',
-    initialPosition: { top: '70%', right: '15%' },
+    name: 'Project 03 (CurriculOS)',
+    icon: 'folder.avif', // Alterado de 'type' para 'icon'
   },
   {
     id: 'trash',
     name: "Don't Look",
-    type: 'trash',
-    initialPosition: { top: '65%', right: '5%' },
+    icon: 'trash.avif', // Alterado de 'type' para 'icon'
   },
 ];
 
