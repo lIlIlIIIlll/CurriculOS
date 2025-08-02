@@ -1,42 +1,47 @@
 // src/App.jsx
 import React from 'react';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
+import styled from 'styled-components'; // 1. Importando 'styled' para criar o wrapper
 import theme from './styles/theme';
 import Desktop from './components/Desktop';
 import Dock from './components/Dock';
+import MenuBar from './components/MenuBar';
 
-// O GlobalStyle foi atualizado para usar uma imagem de fundo.
+// Nenhuma mudança no GlobalStyle
 const GlobalStyle = createGlobalStyle`
   body {
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
-    
-    /* 
-      1. As propriedades de 'background-image' e 'background-size'
-         que criavam a grade foram removidas.
-    */
-
-    /* 
-      2. Adicionando o novo wallpaper.
-      - A imagem 'waves.jpg' é carregada a partir da pasta /public.
-      - 'background-size: cover' garante que a imagem cubra toda a tela.
-      - 'background-position: center' centraliza a imagem.
-      - 'background-repeat: no-repeat' impede que a imagem se repita.
-    */
     background-image: url('/waves.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
     overflow: hidden;
   }
+`;
+
+// 2. Criando o AppWrapper como um container de CSS Grid
+const AppWrapper = styled.div`
+  height: 100vh; /* Ocupa a altura total da tela */
+  display: grid;
+  /* Define duas linhas:
+     - A primeira ('auto') terá a altura exata do seu conteúdo (a MenuBar).
+     - A segunda ('1fr') ocupará todo o espaço restante (o Desktop).
+  */
+  grid-template-rows: auto 1fr;
 `;
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      <Desktop />
+      {/* 3. Envolvendo a MenuBar e o Desktop no novo AppWrapper */}
+      <AppWrapper>
+        <MenuBar />
+        <Desktop />
+      </AppWrapper>
+      {/* A Dock permanece fora do AppWrapper, pois seu posicionamento
+          é fixo e independente do fluxo do layout principal. */}
       <Dock />
     </ThemeProvider>
   );

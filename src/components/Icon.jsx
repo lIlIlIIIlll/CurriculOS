@@ -3,8 +3,9 @@
 import React, { useRef } from 'react';
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
+import useWindowStore from '../store/windowStore';
 
-// O wrapper principal do ícone.
+// Nenhuma mudança nos styled-components
 const IconWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -18,19 +19,13 @@ const IconWrapper = styled.div`
   }
 `;
 
-// Container para o elemento visual do ícone.
-// Agora ele tem 'position: relative' para posicionar o overlay de seleção.
 const IconVisual = styled.div`
-  width: 64px; /* Tamanho fixo para a imagem do ícone */
+  width: 64px;
   height: 64px;
-  position: relative; /* Essencial para o pseudo-elemento ::before */
+  position: relative;
   user-select: none;
-  margin-bottom: 8px; /* Espaço entre o ícone e o texto */
+  margin-bottom: 8px;
 
-  /* 
-    O overlay de seleção. É um pseudo-elemento que cobre o ícone.
-    Ele fica invisível por padrão e aparece ao passar o mouse.
-  */
   &::before {
     content: '';
     position: absolute;
@@ -41,24 +36,21 @@ const IconVisual = styled.div`
     background-color: rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
-    opacity: 0; /* Invisível por padrão */
-    transition: opacity 150ms ease-in-out; /* Animação suave */
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
   }
 
-  /* Mostra o overlay ao passar o mouse sobre o IconWrapper */
   ${IconWrapper}:hover &::before {
     opacity: 1;
   }
 `;
 
-// A imagem do ícone em si.
 const IconImage = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Garante que a imagem caiba sem distorcer */
+  object-fit: contain;
 `;
 
-// Rótulo de texto abaixo do ícone
 const IconLabel = styled.span`
   color: ${({ theme }) => theme.colors.text};
   font-size: 14px;
@@ -66,25 +58,36 @@ const IconLabel = styled.span`
   border-radius: 4px;
   user-select: none;
   max-width: 100%;
-  word-wrap: break-word; /* Garante que nomes longos quebrem a linha */
+  word-wrap: break-word;
 
-  /* Simula o fundo selecionado do macOS ao passar o mouse */
   ${IconWrapper}:hover & {
-    background-color: #007bff; /* Azul de seleção do macOS */
+    background-color: #007bff;
     color: white;
   }
 `;
 
-// A prop 'type' foi substituída por 'icon' (nome do arquivo de imagem).
-// A função getIconComponent foi removida.
-function Icon({ name, icon }) {
+// 1. O componente agora recebe o objeto 'item' inteiro como prop.
+function Icon({ item }) {
+  // 2. Desestruturamos as propriedades que o Icon precisa para se renderizar.
+  const { id, name, icon } = item;
+
+  const { openWindow } = useWindowStore();
   const nodeRef = useRef(null);
+
+  const handleDoubleClick = () => {
+    // 3. Passamos o objeto 'item' COMPLETO para a função openWindow.
+    // Agora o store terá acesso a 'component', 'resizable', etc.
+    openWindow(item);
+  };
 
   return (
     <Draggable bounds="parent" handle=".icon-handle" nodeRef={nodeRef}>
-      <IconWrapper ref={nodeRef} className="icon-handle">
+      <IconWrapper
+        ref={nodeRef}
+        className="icon-handle"
+        onDoubleClick={handleDoubleClick}
+      >
         <IconVisual>
-          {/* Renderiza a imagem do ícone dinamicamente */}
           <IconImage src={`/${icon}`} alt={name} />
         </IconVisual>
         <IconLabel>{name}</IconLabel>
