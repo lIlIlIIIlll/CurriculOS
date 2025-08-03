@@ -1,7 +1,7 @@
 // src/components/Window.jsx
 
 import React, { useRef } from 'react';
-import styled from 'styled-components'; // O 'css' helper não é mais necessário
+import styled from 'styled-components';
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import { motion } from 'framer-motion';
@@ -11,24 +11,20 @@ import { glassmorphismStyle } from '../styles/sharedStyles';
 
 // --- Styled Components ---
 
-// O 'maximizedStyle' foi removido. A animação será controlada pelo Framer Motion.
+// O WindowWrapper agora é um motion.div para animar seu tamanho.
+// O posicionamento (transform) será controlado pelo Draggable.
 const WindowWrapper = styled(motion.div)`
-  position: absolute;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: 100%;
-  height: 100%;
+  background: #f0f0f0; // Fundo padrão da janela
+  width: 100%; // Ocupa 100% do ResizableBox
+  height: 100%; // Ocupa 100% do ResizableBox
 `;
 
-// O DraggableWrapper agora é um motion.div para controlar a animação de maximização.
-const DraggableWrapper = styled(motion.div)`
-  position: absolute;
-`;
-
-// Nenhuma mudança no resto dos styled-components
+// Os demais styled-components não precisam de alteração.
 const WindowHeader = styled.div`
   height: 36px;
   display: flex;
@@ -71,36 +67,46 @@ const WindowTitle = styled.div`
 const WindowBody = styled.div`
   flex-grow: 1;
   height: 100%;
-  overflow: hidden;
+  overflow: auto; // Alterado para 'auto' para permitir scroll no conteúdo
 `;
 
 // --- Animações ---
 
-// Variants para a animação de entrada da janela
-const windowContentVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { opacity: 1, scale: 1 },
-};
-
-// 1. Variants para controlar o estado de maximização do container da janela
-const wrapperVariants = {
-  initial: {
-    // No estado inicial, não definimos tamanho ou posição,
-    // deixando o ResizableBox ou o tamanho padrão controlar.
-  },
+// 1. Variants para animar o tamanho da janela
+const windowSizeVariants = {
+  restored: (size) => ({
+    width: size.width,
+    height: size.height,
+  }),
   maximized: {
-    top: 0,
-    left: 0,
-    width: '100vw', // Ocupa a largura total da viewport
-    height: '100vh', // Ocupa a altura da viewport menos a Dock
-    // O 'transform' é resetado para garantir o posicionamento correto.
+    // A altura desconta a MenuBar. O 'calc' é uma forma segura de fazer isso.
+    width: '100vw',
+    height: 'calc(100vh - 28px)',
   },
 };
 
 // --- Componente ---
 
-function Window({ id, title, zIndex, resizable, component, directory, isMaximized }) {
-  const { closeWindow, focusWindow, toggleMaximize } = useWindowStore();
+// 2. O componente agora recebe 'position' e 'size' do store.
+function Window({
+  id,
+  title,
+  zIndex,
+  resizable,
+  component,
+  directory,
+  isMaximized,
+  position,
+  size,
+}) {
+  // 3. Pegamos as novas ações para atualizar o estado.
+  const {
+    closeWindow,
+    focusWindow,
+    toggleMaximize,
+    updateWindowPosition,
+    updateWindowSize,
+  } = useWindowStore();
   const nodeRef = useRef(null);
 
   const renderContent = () => {
@@ -111,21 +117,15 @@ function Window({ id, title, zIndex, resizable, component, directory, isMaximize
   };
 
   const windowContent = (
-    <WindowWrapper
-      // A prop 'isMaximized' foi removida daqui
-      style={{ zIndex }}
-      onMouseDown={() => focusWindow(id)}
-      variants={windowContentVariants}
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      layout // A prop 'layout' continua aqui para animar o redimensionamento manual
-    >
+    <WindowWrapper style={{ zIndex }} onMouseDown={() => focusWindow(id)}>
       <WindowHeader className="window-header">
         <TrafficLights>
           <TrafficLightButton color="#ff5f57" onClick={() => closeWindow(id)} />
           <TrafficLightButton color="#febc2e" onClick={() => closeWindow(id)} />
-          <TrafficLightButton color="#28c840" onClick={() => toggleMaximize(id)} />
+          <TrafficLightButton
+            color="#28c840"
+            onClick={() => toggleMaximize(id)}
+          />
         </TrafficLights>
         <WindowTitle>{title}</WindowTitle>
       </WindowHeader>
@@ -134,33 +134,61 @@ function Window({ id, title, zIndex, resizable, component, directory, isMaximize
   );
 
   return (
+    // 4. Draggable é agora um componente controlado.
     <Draggable
       nodeRef={nodeRef}
       handle=".window-header"
       bounds="parent"
+      // A posição é forçada para (0,0) quando maximizado.
+      position={isMaximized ? { x: 0, y: 0 } : position}
+      // Quando o usuário para de arrastar, salvamos a nova posição no store.
+      onStop={(e, data) => {
+        if (!isMaximized) {
+          updateWindowPosition(id, { x: data.x, y: data.y });
+        }
+      }}
+      // Desabilita o arraste quando a janela está maximizada.
       disabled={isMaximized}
     >
-      {/* 2. O DraggableWrapper agora é um motion.div que controla a animação */}
-      <DraggableWrapper
+      {/* 5. Este motion.div é o container que será animado e redimensionado. */}
+      <motion.div
         ref={nodeRef}
-        variants={wrapperVariants}
-        // 3. A prop 'animate' escolhe a variant com base no estado 'isMaximized'
-        animate={isMaximized ? 'maximized' : 'initial'}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        // Anima entre os estados 'restored' e 'maximized'.
+        animate={isMaximized ? 'maximized' : 'restored'}
+        variants={windowSizeVariants}
+        // Passa o 'size' para a variant 'restored'.
+        custom={size}
+        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          // Garante que o zIndex seja aplicado aqui também.
+          zIndex,
+        }}
       >
         {resizable && !isMaximized ? (
+          // 6. ResizableBox também é controlado pelo estado 'size'.
           <ResizableBox
-            height={400}
-            width={600}
+            height={size.height}
+            width={size.width}
             minConstraints={[350, 200]}
             maxConstraints={[1200, 800]}
+            // Quando o usuário para de redimensionar, salvamos o novo tamanho.
+            onResizeStop={(e, data) => {
+              updateWindowSize(id, {
+                width: data.size.width,
+                height: data.size.height,
+              });
+            }}
           >
             {windowContent}
           </ResizableBox>
         ) : (
-          windowContent
+          // Se não for redimensionável ou estiver maximizado, renderiza o conteúdo diretamente.
+          <div style={{ width: '100%', height: '100%' }}>{windowContent}</div>
         )}
-      </DraggableWrapper>
+      </motion.div>
     </Draggable>
   );
 }

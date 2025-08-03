@@ -13,14 +13,14 @@ const rebaseZIndexes = (windows) => {
 };
 
 const useWindowStore = create((set, get) => ({
-  // ESTADO INICIAL:
+  // ESTADO INICIAL: A propriedade 'nextZIndex' foi removida.
   openWindows: [],
 
   // AÇÕES
 
   openWindow: (windowData) => {
     const { openWindows } = get();
-    const { id, name: title, defaultPosition, defaultSize } = windowData;
+    const { id, name: title } = windowData;
 
     const windowExists = openWindows.some((win) => win.id === id);
 
@@ -28,14 +28,11 @@ const useWindowStore = create((set, get) => ({
       // Se a janela já existe, apenas a focamos.
       get().focusWindow(id);
     } else {
-      // 1. Se não existe, criamos a nova janela com os novos dados de posição e tamanho.
+      // Se não existe, criamos a nova janela.
       const newWindow = {
         ...windowData,
         title,
         isMaximized: false,
-        // 2. Define a posição e tamanho iniciais, com valores padrão caso não sejam fornecidos.
-        position: defaultPosition || { x: 100, y: 100 },
-        size: defaultSize || { width: 600, height: 400 },
       };
 
       // Adicionamos a nova janela ao final da lista e re-baseamos todos os z-indexes.
@@ -54,6 +51,7 @@ const useWindowStore = create((set, get) => ({
     set({ openWindows: updatedWindows });
   },
 
+  // A lógica de 'focusWindow' foi completamente refatorada.
   focusWindow: (id) => {
     const { openWindows } = get();
 
@@ -61,8 +59,9 @@ const useWindowStore = create((set, get) => ({
     const targetWindow = openWindows.find((win) => win.id === id);
     const otherWindows = openWindows.filter((win) => win.id !== id);
 
-    if (!targetWindow) return;
+    if (!targetWindow) return; // Se não encontrar a janela, não faz nada.
 
+    // Verifica se a janela já está no topo. Se sim, não faz nada (otimização).
     if (openWindows[openWindows.length - 1].id === id) {
       return;
     }
@@ -76,30 +75,11 @@ const useWindowStore = create((set, get) => ({
     set({ openWindows: updatedWindows });
   },
 
+  // Nenhuma mudança na ação toggleMaximize.
   toggleMaximize: (id) => {
     set((state) => ({
       openWindows: state.openWindows.map((win) =>
         win.id === id ? { ...win, isMaximized: !win.isMaximized } : win
-      ),
-    }));
-  },
-
-  // 3. NOVA AÇÃO: Atualiza a posição de uma janela.
-  // Será chamada pelo callback 'onStop' do react-draggable.
-  updateWindowPosition: (id, newPosition) => {
-    set((state) => ({
-      openWindows: state.openWindows.map((win) =>
-        win.id === id ? { ...win, position: newPosition } : win
-      ),
-    }));
-  },
-
-  // 4. NOVA AÇÃO: Atualiza o tamanho de uma janela.
-  // Será chamada pelo callback 'onResizeStop' do react-resizable.
-  updateWindowSize: (id, newSize) => {
-    set((state) => ({
-      openWindows: state.openWindows.map((win) =>
-        win.id === id ? { ...win, size: newSize } : win
       ),
     }));
   },
