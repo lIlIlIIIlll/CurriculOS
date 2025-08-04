@@ -10,6 +10,7 @@ import ExplorerWindow from './window-content/ExplorerWindow';
 import { glassmorphismStyle } from '../styles/sharedStyles';
 
 // --- Styled Components ---
+// Nenhuma mudança nos estilos
 
 const CustomResizeHandle = styled.div`
   position: absolute;
@@ -18,7 +19,7 @@ const CustomResizeHandle = styled.div`
   bottom: 0;
   right: 0;
   cursor: se-resize;
-  z-index: 10; /* Mantém o z-index para garantir que o handle fique na frente */
+  z-index: 10;
 `;
 
 const WindowWrapper = styled(motion.div)`
@@ -32,7 +33,6 @@ const WindowWrapper = styled(motion.div)`
   height: 100%;
 `;
 
-// O restante dos styled-components permanece o mesmo.
 const WindowHeader = styled.div`
   height: 36px;
   display: flex;
@@ -116,11 +116,15 @@ function Window({
 
   const renderContent = () => {
     if (directory) {
+      // 1. A prop 'size' do componente Window é passada para o ExplorerWindow
+      //    como 'parentSize'. Isso conecta o estado de tamanho da janela
+      //    ao seu conteúdo.
       return (
         <ExplorerWindow
           directoryId={directory}
           selectedItemId={id}
           isParentMaximized={isMaximized}
+          parentSize={size}
         />
       );
     }
@@ -128,7 +132,6 @@ function Window({
   };
 
   const windowContent = (
-    // 1. A prop onMouseDown foi removida daqui para evitar conflitos de eventos.
     <WindowWrapper style={{ zIndex }}>
       <WindowHeader className="window-header">
         <TrafficLights>
@@ -157,7 +160,6 @@ function Window({
         }
       }}
       disabled={isMaximized}
-      // 2. O foco agora é acionado no início do arraste.
       onStart={() => focusWindow(id)}
     >
       <motion.div
@@ -185,7 +187,6 @@ function Window({
                 height: data.size.height,
               });
             }}
-            // 3. O foco também é acionado no início do redimensionamento.
             onResizeStart={() => focusWindow(id)}
             resizeHandles={['se']}
             handle={<CustomResizeHandle />}

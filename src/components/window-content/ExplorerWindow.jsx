@@ -73,8 +73,13 @@ const ContentArea = styled.main`
 
 // --- Componente ---
 
-// 1. O componente agora recebe 'isParentMaximized' como prop.
-function ExplorerWindow({ directoryId, selectedItemId, isParentMaximized }) {
+// 1. O componente agora recebe 'parentSize' como prop.
+function ExplorerWindow({
+  directoryId,
+  selectedItemId,
+  isParentMaximized,
+  parentSize,
+}) {
   const [activeItemId, setActiveItemId] = useState(selectedItemId);
 
   const directoryItems = desktopItems.filter(
@@ -89,11 +94,12 @@ function ExplorerWindow({ directoryId, selectedItemId, isParentMaximized }) {
 
   const renderMainContent = () => {
     if (activeItem && activeItem.subItems) {
-      // 2. A prop 'isParentMaximized' é passada para o ProjectWindow.
+      // 2. A prop 'parentSize' é passada diretamente para o ProjectWindow.
       return (
         <ProjectWindow
           items={activeItem.subItems}
           isParentMaximized={isParentMaximized}
+          parentSize={parentSize}
         />
       );
     }

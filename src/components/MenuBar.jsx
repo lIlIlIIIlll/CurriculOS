@@ -102,7 +102,8 @@ function MenuBar() {
       <MenuSection>
         <Logo src="/curriculOS.png" alt="CurriculOS Logo" />
         <MenuItem href="#">CurriculOS - Code By Leo</MenuItem>
-        <MenuItem href="#">Contact</MenuItem>
+        <MenuItem href="https://wa.me/5571988366709?text=Ol%C3%A1%20Leonardo%2C%20vim%20atrav%C3%A9s%20do%20seu%20portif%C3%B3lio.
+">Contato</MenuItem>
       </MenuSection>
 
       <MenuSection>
