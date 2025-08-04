@@ -3,7 +3,6 @@ import React from 'react';
 
 // Importando os componentes de conteúdo das janelas
 import AboutMeContent from '../components/window-content/AboutMeContent';
-import ImageWindowContent from '../components/window-content/ImageWindowContent';
 import PdfViewer from '../components/PdfViewer';
 
 /*
@@ -14,19 +13,21 @@ import PdfViewer from '../components/PdfViewer';
   - id: Identificador único.
   - name: Nome exibido abaixo do ícone e no título da janela.
   - icon: Caminho para a imagem do ícone (na pasta /public).
-  - component: O componente React a ser renderizado dentro da janela.
+  - component: (Opcional) O componente React a ser renderizado dentro da janela.
   - resizable: (Opcional) Booleano que indica se a janela pode ser redimensionada.
   - defaultSize: (Opcional) Tamanho inicial da janela.
   - defaultPosition: (Opcional) Posição inicial da janela.
   - directory: (Opcional) Identificador de diretório para agrupar itens no ExplorerWindow.
+  - subItems: (Opcional) Array de itens que aparecerão DENTRO da janela deste item,
+              criando um "sub-desktop".
 */
 
 const desktopItems = [
   // --- Item 1: Sobre Mim (Abre uma janela com texto) ---
   {
     id: 'about-me',
-    name: 'Sobre Mim',
-    icon: 'folder.avif',
+    name: 'Sobre Mim.txt',
+    icon: 'txt.avif',
     component: <AboutMeContent />,
     resizable: true,
     defaultSize: { width: 550, height: 350 },
@@ -62,24 +63,40 @@ const desktopItems = [
     name: 'Projeto CurriculOS',
     icon: 'folder.avif',
     directory: 'projects',
-    component: (
-      <div>
-        <h4>Sobre este Projeto</h4>
-        <p>Este é o próprio projeto que você está vendo! Uma interface de desktop simulada em React para apresentar um portfólio de forma criativa.</p>
-      </div>
-    ),
+    // 1. A propriedade 'component' foi removida e substituída por 'subItems'.
+    // Este array define os ícones que aparecerão dentro da janela deste projeto.
+    subItems: [
+      {
+        id: 'curriculos-code',
+        name: 'Código Fonte.txt',
+        icon: 'txt.avif',
+        component: <div>Aqui estaria o código-fonte do projeto.</div>,
+        defaultSize: { width: 400, height: 250 },
+      },
+      {
+        id: 'curriculos-design',
+        name: 'Layout.png',
+        icon: 'image.avif',
+        component: <div>Aqui estaria uma imagem do layout.</div>,
+        defaultSize: { width: 500, height: 300 },
+      },
+    ],
   },
   {
     id: 'project-2',
     name: 'API de E-commerce',
     icon: 'folder.avif',
     directory: 'projects',
-    component: (
-      <div>
-        <h4>Sobre este Projeto</h4>
-        <p>Uma API RESTful para uma plataforma de e-commerce, construída com Node.js, Express e MongoDB.</p>
-      </div>
-    ),
+    // 2. Este projeto também usa 'subItems' para definir seu conteúdo.
+    subItems: [
+      {
+        id: 'api-docs',
+        name: 'Documentação.pdf',
+        icon: 'pdf.png',
+        component: (<p>oi</p>), // Sub-itens podem abrir componentes complexos.
+        defaultSize: { width: 800, height: 600 },
+      },
+    ],
   },
   {
     id: 'trash',
